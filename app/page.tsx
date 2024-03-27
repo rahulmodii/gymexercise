@@ -1,51 +1,68 @@
-import { Link } from "@nextui-org/link";
-import { Snippet } from "@nextui-org/snippet";
-import { Code } from "@nextui-org/code"
-import { button as buttonStyles } from "@nextui-org/theme";
-import { siteConfig } from "@/config/site";
-import { title, subtitle } from "@/components/primitives";
-import { GithubIcon } from "@/components/icons";
+"use client"
+import { Card, CardHeader, CardBody, Image, Input } from "@nextui-org/react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+	const [users, setUsers] = useState([]);
+	const [data, setData] = useState([]);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			const res = await fetch('/data.json');
+			const data = await res.json();
+			setUsers(data);
+			setData(data);
+		};
+
+		fetchData();
+	}, []);
+
+	let timeout: NodeJS.Timeout | null = null;
+	const handleSearch = (search: any) => {
+		if (timeout) {
+			clearTimeout(timeout);
+		}
+
+		timeout = setTimeout(() => {
+			filterUsers(search);
+		}, 300); // 300 milliseconds debounce time
+	};
+
+	const filterUsers = (filter: any) => {
+		const filteredUsers = data.filter((user: any) => {
+			return (
+				user.body_part.toLowerCase().includes(filter.toLowerCase()) ||
+				user.equipment.toLowerCase().includes(filter.toLowerCase()) ||
+				user.name.toLowerCase().includes(filter.toLowerCase()) ||
+				user.target.toLowerCase().includes(filter.toLowerCase())
+			);
+		});
+		setUsers(filteredUsers);
+	};
+
 	return (
 		<section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-			<div className="inline-block max-w-lg text-center justify-center">
-				<h1 className={title()}>Make&nbsp;</h1>
-				<h1 className={title({ color: "violet" })}>beautiful&nbsp;</h1>
-				<br />
-				<h1 className={title()}>
-					websites regardless of your design experience.
-				</h1>
-				<h2 className={subtitle({ class: "mt-4" })}>
-					Beautiful, fast and modern React UI library.
-				</h2>
-			</div>
-
-			<div className="flex gap-3">
-				<Link
-					isExternal
-					href={siteConfig.links.docs}
-					className={buttonStyles({ color: "primary", radius: "full", variant: "shadow" })}
-				>
-					Documentation
-				</Link>
-				<Link
-					isExternal
-					className={buttonStyles({ variant: "bordered", radius: "full" })}
-					href={siteConfig.links.github}
-				>
-					<GithubIcon size={20} />
-					GitHub
-				</Link>
-			</div>
-
-			<div className="mt-8">
-				<Snippet hideSymbol hideCopyButton variant="flat">
-					<span>
-						Get started by editing <Code color="primary">app/page.tsx</Code>
-					</span>
-				</Snippet>
-			</div>
+			<Input type="search" label="Search" onChange={(e) => handleSearch(e.target.value)} />
+			{
+				users.map((u: any, i) => (
+					<Card className="py-4" key={i} style={{ maxWidth: 400 }}>
+						<CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+							<h4 className="font-bold text-large text-wrap capitalize">{u?.name}</h4>
+							<small className="text-default-500 capitalize">Equipment : {u?.equipment}</small>
+							<small className="text-default-500 capitalize">Target : {u?.target}</small>
+							<small className="text-default-500 capitalize">Body Part : {u?.body_part}</small>
+						</CardHeader>
+						<CardBody className="overflow-visible py-2">
+							<Image
+								alt="Card background"
+								className="object-cover rounded-xl"
+								src={`/exercise/${u?.image}`}
+								width={370}
+							/>
+						</CardBody>
+					</Card>
+				))
+			}
 		</section>
 	);
 }
