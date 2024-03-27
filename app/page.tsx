@@ -41,11 +41,11 @@ export default function Home() {
 	};
 
 	return (
-		<section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
+		<section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10" >
 			<Input type="search" label="Search" onChange={(e) => handleSearch(e.target.value)} />
 			{
 				users.map((u: any, i) => (
-					<Card className="py-4" key={i} style={{ maxWidth: 400 }}>
+					<Card className="py-4" key={i} style={{ maxWidth: 400, minHeight: 500 }}>
 						<CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
 							<h4 className="font-bold text-large text-wrap capitalize">{u?.name}</h4>
 							<small className="text-default-500 capitalize">Equipment : {u?.equipment}</small>
